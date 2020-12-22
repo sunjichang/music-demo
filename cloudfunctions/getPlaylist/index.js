@@ -5,10 +5,42 @@ const URL = 'http://musicapi.leanapp.cn/personalized'
 
 cloud.init()
 
+const db = cloud.database({env: 'music-demo-7gzv296j5ff56449'})
+const playlistCollection = db.collection('playlist')
+
 // 云函数入口函数
 exports.main = async (event, context) => {
+  const list = await playlistCollection.get()
+  
   const playlist = await rp(URL).then(res => {
-    return res
+    return JSON.parse(res).result
   })
+  const newData = []
+  for (let i = 0, len1 = playlist.length; i< len1; i++) {
+    let flag = true
+    for (let j =0, len2 = list.data.length; j< len2; j++) {
+      if (playlist[i].id === list.data[j].id) {
+        flag = false
+        break
+      }
+    }
+    if (flag){
+      newData.push(playlist[i])
+    }
+  }
+  for (let i = 0, len = newData.length; i < len; i++) {
+    await playlistCollection.add({
+      data: {
+        ...newData[i],
+        createTime: db.serverDate(),
+      }
+    }).then(res => {
+      console.log('插入成功')
+    }).catch(err => {
+      console.log('插入失败')
+    })
+
+  }
+  return newData.length
   console.log(playlist)
 }
