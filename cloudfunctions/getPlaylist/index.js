@@ -10,7 +10,7 @@ const db = cloud.database({
 })
 const playlistCollection = db.collection('playlist')
 
-const MAX_LIMIT = 10
+const MAX_LIMIT = 100
 
 // 云函数入口函数
 exports.main = async (event, context) => {
