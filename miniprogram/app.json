@@ -2,7 +2,9 @@
   "pages": [
     "pages/playlist/playlist",
     "pages/blog/blog",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/musiclist/musiclist",
+    "pages/player/player"
   ],
   "tabBar": {
     "color": "#474747",
