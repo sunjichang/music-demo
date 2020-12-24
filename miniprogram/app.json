@@ -6,6 +6,7 @@
     "pages/musiclist/musiclist",
     "pages/player/player"
   ],
+  "requiredBackgroundModes": ["audio", "location"],
   "tabBar": {
     "color": "#474747",
     "selectedColor": "#d43c43",
