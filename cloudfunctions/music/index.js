@@ -43,6 +43,11 @@ exports.main = async (event, context) => {
     })
   })
 
-  return app.serve()
+  app.router('lyric', async(ctx,next) => {
+    ctx.body = await rp('http://music.163.com/api/song/media?id=' + event.musicId).then(res => {
+      return res
+    })
+  })
 
+  return app.serve()
 }

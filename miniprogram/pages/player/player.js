@@ -14,13 +14,14 @@ Page({
   data: {
     picUrl: '',
     isPlaying: false, // false 表示不播放 true 表示正在播放
+    isLyricShow: false, //歌词是否显示
+    lyric: '',
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    console.log(options)
     nowPlayingIndex = options.index
     musiclist = wx.getStorageSync('musiclist')
     this._loadMusicDetail(options.musicId)
@@ -46,7 +47,6 @@ Page({
         $url: 'musicUrl'
       }
     }).then(res => {
-      console.log(res)
       let result = JSON.parse(res.result)
       backgroundAudioManager.title = music.name
       backgroundAudioManager.src = result.data[0].url
@@ -57,8 +57,24 @@ Page({
       this.setData({
         isPlaying: true
       })
-
       wx.hideLoading()
+      // 加载歌词
+      wx.cloud.callFunction({
+        name: 'music',
+        data: {
+          musicId,
+          $url: 'lyric'
+        }
+      }).then(res => {
+        let lyric = '暂无歌词'
+        const lrc = JSON.parse(res.result)
+        if (lrc) {
+          lyric = lrc.lyric || '暂无歌词'
+        }
+        this.setData({
+          lyric
+        })
+      })
     })
   },
 
@@ -92,6 +108,14 @@ Page({
    */
   onReady: function () {
 
+  },
+  onChangeLyricShow() {
+    this.setData({
+      isLyricShow: !this.data.isLyricShow
+    })
+  },
+  timeUpdate(event) {
+    this.selectComponent('.lyric').update(event.detail.currentTime)
   },
 
   /**
