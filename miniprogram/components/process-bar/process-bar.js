@@ -12,10 +12,13 @@ Component({
    * 组件的属性列表
    */
   properties: {
-
+    isSame: Boolean
   },
   lifetimes: {
     ready() {
+      if (this.properties.isSame && this.data.showTime.totalTime === '00:00') {
+        this._setTime()
+      }
       this._getMovableDis()
       this._bindBGMEvent()
     },
@@ -68,12 +71,14 @@ Component({
       backgroundAudioManager.onPlay(() => {
         console.log('onPlay')
         isMoving = false
+        this.triggerEvent('musicPlay')
       })
       backgroundAudioManager.onStop(() => {
         console.log('onPlay')
       })
       backgroundAudioManager.onPause(() => {
         console.log('onPause')
+        this.triggerEvent('musicPause')
       })
       backgroundAudioManager.onWaiting(() => {
         console.log('onWaiting')

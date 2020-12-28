@@ -6,6 +6,8 @@ let nowPlayingIndex = 0
 // 获取全局唯一的背景音频管理器
 const backgroundAudioManager = wx.getBackgroundAudioManager()
 
+const app = getApp()
+
 Page({
 
   /**
@@ -16,6 +18,7 @@ Page({
     isPlaying: false, // false 表示不播放 true 表示正在播放
     isLyricShow: false, //歌词是否显示
     lyric: '',
+    isSame: false, // 是否是同一歌曲
   },
 
   /**
@@ -28,7 +31,18 @@ Page({
   },
 
   _loadMusicDetail(musicId) {
-    backgroundAudioManager.stop()
+    if (musicId == app.getPlayingMusicId()) {
+      this.setData({
+        isSame: true
+      })
+    } else {
+      this.setData({
+        isSame: false
+      })
+    }
+    if (!this.data.isSame) {
+      backgroundAudioManager.stop()
+    }
     let music = musiclist[nowPlayingIndex]
     wx.setNavigationBarTitle({
       title: music.name
@@ -37,6 +51,9 @@ Page({
       picUrl: music.al.picUrl,
       isPlaying: false
     })
+    
+    app.setPlayingMusicId(musicId)
+
     wx.showLoading({
       title: '歌曲加载中',
     })
@@ -48,11 +65,19 @@ Page({
       }
     }).then(res => {
       let result = JSON.parse(res.result)
-      backgroundAudioManager.title = music.name
-      backgroundAudioManager.src = result.data[0].url
-      backgroundAudioManager.coverImgUrl = music.al.picUrl
-      backgroundAudioManager.singer = music.ar[0].name
-      backgroundAudioManager.epname = music.al.name
+      if (result.data[0].url == null) {
+        wx.showToast({
+          title: '无权限播放',
+        })
+        return
+      }
+      if (!this.data.isSame) {
+        backgroundAudioManager.title = music.name
+        backgroundAudioManager.src = result.data[0].url
+        backgroundAudioManager.coverImgUrl = music.al.picUrl
+        backgroundAudioManager.singer = music.ar[0].name
+        backgroundAudioManager.epname = music.al.name
+      }
 
       this.setData({
         isPlaying: true
@@ -116,6 +141,17 @@ Page({
   },
   timeUpdate(event) {
     this.selectComponent('.lyric').update(event.detail.currentTime)
+  },
+
+  onPlay() {
+    this.setData({
+      isPlaying: true
+    })
+  },
+  onPause() {
+    this.setData({
+      isPlaying: false
+    })
   },
 
   /**
